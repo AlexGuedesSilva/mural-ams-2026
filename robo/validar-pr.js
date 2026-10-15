@@ -20,7 +20,8 @@ const MARCA = '<!-- robo-do-mural -->';
 // existeNaMain(caminho) diz se a main já tem um arquivo com esse nome.
 async function analisarPR({ arquivos, lerConteudo, existeNaMain }) {
   const problemas = validarMudancas(arquivos);
-  if (problemas.length > 0) return { problemas, cartao: null };
+  // refazer: o PR mexeu no que não devia; editar o cartão não resolve, melhor recomeçar.
+  if (problemas.length > 0) return { problemas, cartao: null, refazer: true };
 
   const { caminho } = arquivos[0];
   if (await existeNaMain(caminho)) {
@@ -36,7 +37,7 @@ async function analisarPR({ arquivos, lerConteudo, existeNaMain }) {
   return validarCartao(caminho, await lerConteudo(caminho));
 }
 
-function escreverComentario({ problemas, cartao }) {
+function escreverComentario({ problemas, cartao, refazer }) {
   if (cartao) {
     const limpar = (t) => t.replace(/[<>*_`[\]\\|#]/g, '');
     return [
@@ -51,16 +52,21 @@ function escreverComentario({ problemas, cartao }) {
       'Agora é só esperar o professor aprovar. Quando ele fizer o merge, seu cartão aparece no mural! 🎉',
     ].join('\n');
   }
+  const quantos = problemas.filter((p) => p.startsWith('❌')).length;
+  const comoConsertar = refazer
+    ? '**Como consertar:** o jeito mais fácil é recomeçar. Lá embaixo, clique em **Close pull request**. ' +
+      'Depois, entre na pasta `cartoes/` do projeto e crie **só** o seu arquivo (Add file → Create new file).'
+    : '**Como consertar:** clique na aba **Files changed** aqui em cima, depois nos **três pontinhos (⋯)** do arquivo ' +
+      'e em **Edit file**. Arrume, clique em **Commit changes** e pronto: eu confiro de novo sozinho!';
   return [
     MARCA,
-    `## 🔧 Quase lá! Achei ${problemas.length === 1 ? '1 coisinha' : `${problemas.length} coisinhas`} para arrumar`,
+    `## 🔧 Quase lá! Achei ${quantos === 1 ? '1 coisinha' : `${quantos} coisinhas`} para arrumar`,
     '',
     'Sou o robô do mural 🤖. Antes do cartão ir para o mural, eu confiro se está tudo certo:',
     '',
     ...problemas.map((p) => (p.startsWith('💡') ? `  ${p}` : `- ${p}`)),
     '',
-    '**Como consertar:** clique na aba **Files changed** aqui em cima, depois nos **três pontinhos (⋯)** do arquivo ' +
-      'e em **Edit file**. Arrume, clique em **Commit changes** e pronto: eu confiro de novo sozinho!',
+    comoConsertar,
   ].join('\n');
 }
 
