@@ -22,7 +22,7 @@ concurrency:
 jobs:
   montar:
     name: Montar o site
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
@@ -45,7 +45,7 @@ jobs:
   publicar:
     name: Colocar no ar
     needs: montar
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     environment:
       name: github-pages
