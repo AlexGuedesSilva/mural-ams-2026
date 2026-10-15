@@ -1,0 +1,198 @@
+/* Mural da Turma — pensado para ser lido numa TV a 3–5 metros. */
+
+:root {
+  --fundo: #14122b;
+  --fundo-2: #221d4a;
+  --texto: #fdfbff;
+  --texto-suave: #c9c3ee;
+  --tinta: #1b1530; /* cor do texto dentro dos cartões */
+  --vermelho: #ff6b6b;
+  --laranja: #ffa94d;
+  --amarelo: #ffd93d;
+  --verde: #6bcb77;
+  --turquesa: #3fd0c9;
+  --azul: #5aa9ff;
+  --roxo: #b388ff;
+  --rosa: #ff8fc7;
+  --espaco: clamp(10px, 1.4vw, 24px);
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 10%, #3b2a7a55, transparent 40%),
+    radial-gradient(circle at 85% 90%, #0f6b6b44, transparent 45%),
+    var(--fundo);
+  color: var(--texto);
+  font-family: "Nunito", "Segoe UI Rounded", "Arial Rounded MT Bold", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  padding: var(--espaco) max(16px, var(--espaco));
+  gap: var(--espaco);
+}
+
+.topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4.2vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.subtitulo {
+  margin: 0.4em 0 0;
+  color: var(--texto-suave);
+  font-size: clamp(0.95rem, 1.6vw, 1.7rem);
+}
+.subtitulo strong { color: var(--amarelo); }
+
+.contador {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--fundo-2);
+  border: 3px solid #ffffff22;
+  border-radius: 20px;
+  padding: 0.3em 0.8em;
+  font-size: clamp(2rem, 4.5vw, 5rem);
+  font-weight: 900;
+  line-height: 1;
+}
+.contador small {
+  font-size: 0.28em;
+  font-weight: 700;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Grade normal (celular e computador): quantas colunas couberem. */
+.mural {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: var(--espaco);
+  align-content: start;
+}
+
+/* .cartao é a "moldura" que mede a largura; .miolo é o papel colorido.
+   As medidas em cqi são % da largura do cartão: tudo cresce junto com ele. */
+.cartao {
+  --u: 1cqi; /* 1% da largura do cartão */
+  container-type: inline-size;
+  min-width: 0;
+  rotate: var(--giro, 0deg);
+}
+.miolo {
+  background: var(--cor, var(--azul));
+  color: var(--tinta);
+  border-radius: calc(7 * var(--u));
+  padding: calc(6 * var(--u)) calc(8 * var(--u));
+  aspect-ratio: 5 / 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(2 * var(--u));
+  box-shadow: 0 6px 0 #00000040, 0 14px 30px #00000040;
+  overflow: hidden;
+}
+.cartao .emoji { font-size: calc(22 * var(--u)); line-height: 1; }
+.cartao .nome { margin: 0; font-size: calc(13 * var(--u)); font-weight: 900; line-height: 1.05; overflow-wrap: anywhere; }
+.cartao .frase { margin: 0; font-size: calc(7.4 * var(--u)); font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+
+.cartao.novo { animation: chegou 900ms cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes chegou {
+  from { transform: scale(0.2) rotate(-12deg); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.vazio {
+  text-align: center;
+  font-size: clamp(1.4rem, 3vw, 3rem);
+  color: var(--texto-suave);
+}
+
+.rodape {
+  text-align: center;
+  color: var(--texto-suave);
+  font-size: clamp(0.95rem, 1.5vw, 1.8rem);
+}
+.rodape strong { color: var(--texto); }
+.rodape .credito { display: block; margin-top: 0.3em; font-size: 0.7em; opacity: 0.8; }
+.tv .rodape .credito { display: inline; margin-left: 1.5em; }
+
+/* Destaque: quando chega um cartão novo, ele aparece gigante por alguns segundos. */
+.destaque {
+  position: fixed;
+  inset: 0;
+  background: #0b0a1acc;
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 3vh;
+  z-index: 10;
+}
+.destaque[hidden] { display: none; }
+.destaque-titulo {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 6rem);
+  font-weight: 900;
+  color: var(--amarelo);
+}
+#destaque-cartao .cartao {
+  width: min(80vw, 62vh * 1.25);
+  rotate: -2deg;
+  animation: chegou 900ms cubic-bezier(.2, 1.6, .4, 1) both;
+}
+
+/* Modo TV (endereço com ?tv): o mural.js escolhe colunas e linhas para TUDO caber
+   sem rolar, e cada cartão ocupa a célula inteira. As letras acompanham o menor
+   lado do cartão (largura ou altura), para nunca vazar. */
+.tv { height: 100vh; overflow: hidden; cursor: none; }
+.tv .mural {
+  grid-template-columns: repeat(var(--colunas, 4), 1fr);
+  grid-template-rows: repeat(var(--linhas, 2), 1fr);
+  align-content: stretch;
+  min-height: 0;
+}
+.tv .mural .cartao {
+  --u: min(1cqi, 1.25cqb);
+  container-type: size;
+  display: flex;
+  align-items: center;
+}
+.tv .mural .miolo {
+  aspect-ratio: auto;
+  width: 100%;
+  height: min(100%, 85cqi);
+}
+
+.cor-vermelho { --cor: var(--vermelho); }
+.cor-laranja { --cor: var(--laranja); }
+.cor-amarelo { --cor: var(--amarelo); }
+.cor-verde { --cor: var(--verde); }
+.cor-turquesa { --cor: var(--turquesa); }
+.cor-azul { --cor: var(--azul); }
+.cor-roxo { --cor: var(--roxo); }
+.cor-rosa { --cor: var(--rosa); }
+
+@media (max-width: 560px) {
+  .topo { flex-direction: column; align-items: flex-start; }
+  .contador { flex-direction: row; gap: 0.3em; align-items: baseline; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cartao.novo, #destaque-cartao .cartao { animation: none; }
+}

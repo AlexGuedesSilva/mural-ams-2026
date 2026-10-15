@@ -1,0 +1,55 @@
+# 🚀 Publica o mural no GitHub Pages toda vez que a main muda (ou seja, a cada merge).
+
+name: 🚀 Publicar o mural
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # botão "Run workflow" na aba Actions, para publicar na mão
+
+# O que esta publicação pode fazer: ler o repo e publicar no Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Só uma publicação por vez. Se chegarem vários merges juntos, fica 1 rodando e
+# 1 esperando (a mais nova); as do meio são puladas, porque a mais nova já tem tudo.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  montar:
+    name: Montar o site
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Juntar os cartões no site
+        run: node robo/montar-site.js
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  publicar:
+    name: Colocar no ar
+    needs: montar
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

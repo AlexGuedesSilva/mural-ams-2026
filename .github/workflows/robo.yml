@@ -1,0 +1,49 @@
+# 🤖 O robô do mural: confere cada pull request e responde ✅ ou ❌.
+#
+# Por que "pull_request_target" e não "pull_request"?
+# Os alunos mandam PR a partir de um fork e são contribuidores de primeira viagem.
+# Com "pull_request", o GitHub segura o robô até o dono clicar em "Approve and run"
+# em CADA PR. Com "pull_request_target", o robô roda na hora, porque usa o código
+# da main (confiável). A regra de ouro: NUNCA executar nada que venha do PR.
+# Aqui o script vem da main e só LÊ o texto do cartão pela API, como dado.
+# Decisão completa em PLANO.md e no guia de estudo.
+
+name: 🤖 Robô do mural
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+# Permissões mínimas: ler o repositório e comentar no PR. Nada de escrever código.
+permissions:
+  contents: read
+  pull-requests: write
+
+# Se o aluno corrigir o cartão rapidinho, a conferência antiga é cancelada.
+concurrency:
+  group: robo-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  conferir:
+    name: Conferir cartão
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Baixa o repositório na versão da main (NÃO a do PR).
+      - name: Pegar o código do robô (da main)
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Preparar o Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Conferir o cartão
+        run: node robo/validar-pr.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMERO: ${{ github.event.pull_request.number }}

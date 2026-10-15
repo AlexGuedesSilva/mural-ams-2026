@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mural da Turma · AMS 2026</title>
+  <meta name="description" content="Cada cartão deste mural chegou por um pull request no GitHub, conferido por um robô.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧱</text></svg>">
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div>
+      <h1>🧱 Mural da Turma</h1>
+      <p class="subtitulo">AMS 2026 · cada cartão chegou por um <strong>pull request</strong> conferido pelo robô 🤖✅</p>
+    </div>
+    <div class="contador" aria-live="polite"><span id="total">0</span><small>cartões</small></div>
+  </header>
+
+  <main id="mural" class="mural" aria-label="Cartões da turma"></main>
+  <p id="vazio" class="vazio" hidden>O mural está esperando o primeiro cartão… 👀</p>
+
+  <footer class="rodape">
+    Quer o seu cartão aqui? <strong>github.com/Medinagui/mural-ams-2026</strong>
+    <span class="credito">Aula ministrada por Guilherme Medina (Thompson Tecnologia)</span>
+  </footer>
+
+  <div id="destaque" class="destaque" hidden aria-live="assertive">
+    <p class="destaque-titulo">🎉 Chegou cartão novo!</p>
+    <div id="destaque-cartao"></div>
+  </div>
+
+  <template id="modelo-cartao">
+    <article class="cartao">
+      <div class="miolo">
+        <span class="emoji"></span>
+        <h2 class="nome"></h2>
+        <p class="frase"></p>
+      </div>
+    </article>
+  </template>
+
+  <script src="mural.js"></script>
+</body>
+</html>
